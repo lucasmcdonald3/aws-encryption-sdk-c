@@ -1,0 +1,98 @@
+name: AWS CodeBuild CI
+on:
+  pull_request:
+  push:
+  schedule:
+    - cron: "0 0 * * *" # Daily at 00:00 UTC (4 PM PDT)
+
+permissions:
+  id-token: write
+
+jobs:
+  ubuntuLatestx64AwsLc:
+    name: Ubuntu-Latest x64 AWS-LC
+    runs-on: ubuntu-latest
+    steps:
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          role-to-assume: ${{ secrets.CI_UBUNTU_BATCH_SERVICE_ROLE_ARN }}
+          aws-region: us-west-2
+          role-duration-seconds: 3600
+      - name: Run Ubuntu-Latest x64 AWS-LC
+        uses: aws-actions/aws-codebuild-run-build@v1
+        timeout-minutes: 60
+        with:
+          project-name: csdk-ubuntu-latest-x64-awslc
+          buildspec-override: codebuild/ubuntu-latest-x64/batch.yml
+          image-override: ${{ secrets.CI_AWS_ACCOUNT_ID }}.dkr.ecr.us-west-2.amazonaws.com/linux-docker-images:ubuntu-latest-x64-awslc
+  ubuntuLatestx64:
+    name: Ubuntu-Latest x64
+    runs-on: ubuntu-latest
+    steps:
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          role-to-assume: ${{ secrets.CI_UBUNTU_BATCH_SERVICE_ROLE_ARN }}
+          aws-region: us-west-2
+          role-duration-seconds: 3600
+      - name: Run Ubuntu-Latest x64
+        uses: aws-actions/aws-codebuild-run-build@v1
+        timeout-minutes: 60
+        with:
+          project-name: csdk-ubuntu-latest-x64
+          buildspec-override: codebuild/ubuntu-latest-x64/batch.yml
+          image-override: ${{ secrets.CI_AWS_ACCOUNT_ID }}.dkr.ecr.us-west-2.amazonaws.com/linux-docker-images:ubuntu-latest-x64
+  windowsVS2015:
+    name: Windows VS 2015
+    # 'runs-on' refers to the GHA environment; not the CodeBuild environment
+    runs-on: ubuntu-latest
+    steps:
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          role-to-assume: ${{ secrets.CI_ESDK_C_SERVICE_ROLE }}
+          aws-region: us-west-2
+          role-duration-seconds: 3600
+      - name: Run Windows VS 2015
+        uses: aws-actions/aws-codebuild-run-build@v1
+        timeout-minutes: 60
+        with:
+          project-name: aws-encryption-sdk-c-vs2015
+          buildspec-override: codebuild/windows-msvc-2015.yml
+          image-override: ${{ secrets.CI_AWS_ACCOUNT_ID }}.dkr.ecr.us-west-2.amazonaws.com/windows-docker-images:vs2015-20200508-16
+  windowsVS2015x86:
+    name: Windows VS 2015 x86
+    runs-on: ubuntu-latest
+    steps:
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          role-to-assume: ${{ secrets.CI_ESDK_C_SERVICE_ROLE }}
+          aws-region: us-west-2
+          role-duration-seconds: 3600
+      - name: Run Windows VS 2015 x86
+        uses: aws-actions/aws-codebuild-run-build@v1
+        timeout-minutes: 60
+        with:
+          project-name: aws-encryption-sdk-c-vs2015-x86
+          buildspec-override: codebuild/windows-msvc-2015-x86.yml
+          # Same image as x64; difference is in buildspec
+          image-override: ${{ secrets.CI_AWS_ACCOUNT_ID }}.dkr.ecr.us-west-2.amazonaws.com/windows-docker-images:vs2015-20200508-16
+  windowsVS2017:
+    name: Windows VS 2017
+    runs-on: ubuntu-latest
+    steps:
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          role-to-assume: ${{ secrets.CI_ESDK_C_SERVICE_ROLE }}
+          aws-region: us-west-2
+          role-duration-seconds: 3600
+      - name: Run Windows VS 2017
+        uses: aws-actions/aws-codebuild-run-build@v1
+        timeout-minutes: 60
+        with:
+          project-name: aws-encryption-sdk-c-vs2017
+          buildspec-override: codebuild/windows-msvc-2017.yml
+          image-override: ${{ secrets.CI_AWS_ACCOUNT_ID }}.dkr.ecr.us-west-2.amazonaws.com/windows-docker-images:vs2017-20200508-16
